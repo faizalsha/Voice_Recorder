@@ -1,0 +1,10 @@
+<resources>
+	<dimen name="dimen_128dp">256dp</dimen>
+	<dimen name="dimen_32dp">64dp</dimen>
+	<dimen name="dimen_8dp">16dp</dimen>
+	<dimen name="dimen_64dp">128dp</dimen>
+	<dimen name="dimen_24dp">48dp</dimen>
+	<dimen name="dimen_14sp">28sp</dimen>
+	<dimen name="dimen_0dp">0dp</dimen>
+	<dimen name="dimen_12sp">24sp</dimen>
+</resources>
