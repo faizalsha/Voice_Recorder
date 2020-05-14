@@ -33,10 +33,10 @@
     <Button
         android:id="@+id/btn_play"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/dimen_24dp"
         android:layout_marginBottom="@dimen/dimen_24dp"
         android:text="play"
-        android:textSize="@dimen/dimen_14sp"
+        android:textSize="@dimen/dimen_12sp"
         android:background="@color/colorAccent"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -46,12 +46,12 @@
     <Button
         android:id="@+id/btn_stop"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/dimen_24dp"
         android:layout_marginBottom="@dimen/dimen_24dp"
         android:text="stop"
         android:background="@color/colorAccent"
         android:textColor="@android:color/white"
-        android:textSize="@dimen/dimen_14sp"
+        android:textSize="@dimen/dimen_12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/btn_play" />

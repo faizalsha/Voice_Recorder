@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -38,7 +39,7 @@ public class ListRecordingActivity extends AppCompatActivity implements ListReco
         initializeListener();
         playButton.setOnClickListener(playButtonListener);
         seekBar.setOnSeekBarChangeListener(seekBarChangeListener);
-        String path = getExternalFilesDir("/").getAbsolutePath();
+        String path = Objects.requireNonNull(getExternalFilesDir("/")).getAbsolutePath();
         File directory = new File(path);
         mAllFiles = directory.listFiles();
         ListRecordingAdapter adapter = new ListRecordingAdapter(mAllFiles,this);
@@ -78,7 +79,11 @@ public class ListRecordingActivity extends AppCompatActivity implements ListReco
         completionListener = new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                seekBar.setProgress(mp.getDuration()/1000);
+                if(timer != null){
+                    timer.cancel();
+                    timer = null;
+                }
+                //seekBar.setProgress(mp.getDuration()/1000);
                 playButton.setImageDrawable(getDrawable(R.drawable.ic_play_arrow_32dp));
             }
         };
@@ -131,8 +136,9 @@ public class ListRecordingActivity extends AppCompatActivity implements ListReco
                     public void run() {
                         seekBar.setProgress(mMediaPlayer.getCurrentPosition()/1000);
                     }
-                },0,1000);
+                },0,900);
                 seekBar.setEnabled(true);
+
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -151,4 +157,27 @@ public class ListRecordingActivity extends AppCompatActivity implements ListReco
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Toast.makeText(this, "Destroy", Toast.LENGTH_SHORT).show();
+        if (mMediaPlayer!=null){
+            if (mMediaPlayer.isPlaying()){
+                pauseAudio();
+                mMediaPlayer.stop();
+                mMediaPlayer.release();
+            }
+            mMediaPlayer=null;
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mMediaPlayer!=null){
+            if (mMediaPlayer.isPlaying()){
+                pauseAudio();
+            }
+        }
+    }
 }
