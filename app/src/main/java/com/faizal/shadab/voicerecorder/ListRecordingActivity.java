@@ -7,19 +7,24 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class ListRecordingActivity extends AppCompatActivity implements ListRecordingAdapter.OnRecordingClickListener {
 
-    private File[] mAllFiles;
+    private ArrayList<File> mAllFiles;
     private MediaPlayer mMediaPlayer = null;
     private File mSelectedAudioFile;
     private ImageView playButton;
@@ -27,35 +32,74 @@ public class ListRecordingActivity extends AppCompatActivity implements ListReco
     private SeekBar seekBar;
     private MediaPlayer.OnCompletionListener completionListener;
     private SeekBar.OnSeekBarChangeListener seekBarChangeListener;
-    private View.OnClickListener playButtonListener;
+    private View.OnClickListener buttonClickListener;
+    private Button deleteButton, cancelButton;
+    private RecyclerView recyclerViewRecordings;
+    private LinearLayout mediaPlayerLayout;
+    private TextView confirmDeleteTextView;
+    private ListRecordingAdapter adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_recording);
 
+        confirmDeleteTextView = findViewById(R.id.txt_confirmation);
+        mediaPlayerLayout = findViewById(R.id.media_player);
+        deleteButton = findViewById(R.id.btn_delete);
+        cancelButton = findViewById(R.id.btn_cancel);
         playButton = findViewById(R.id.btn_play);
         seekBar = findViewById(R.id.seekBar);
         seekBar.setEnabled(false);
         initializeListener();
-        playButton.setOnClickListener(playButtonListener);
+        playButton.setOnClickListener(buttonClickListener);
+        deleteButton.setOnClickListener(buttonClickListener);
+        cancelButton.setOnClickListener(buttonClickListener);
         seekBar.setOnSeekBarChangeListener(seekBarChangeListener);
         String path = Objects.requireNonNull(getExternalFilesDir("/")).getAbsolutePath();
         File directory = new File(path);
-        mAllFiles = directory.listFiles();
-        ListRecordingAdapter adapter = new ListRecordingAdapter(mAllFiles,this);
-        RecyclerView recordingList = findViewById(R.id.recycler_view_list_recording);
-        recordingList.setHasFixedSize(true);
-        recordingList.setLayoutManager(new LinearLayoutManager(this));
-        recordingList.setAdapter(adapter);
+        File[] fileList = directory.listFiles();
+        mAllFiles = new ArrayList<>(Arrays.asList(fileList));
+        adapter = new ListRecordingAdapter(mAllFiles,this);
+        recyclerViewRecordings = findViewById(R.id.recycler_view_list_recording);
+        recyclerViewRecordings.setHasFixedSize(false);
+        recyclerViewRecordings.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewRecordings.setAdapter(adapter);
     }
 
     private void initializeListener() {
-        playButtonListener = new View.OnClickListener() {
+        buttonClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mMediaPlayer == null) return;
-                if(mMediaPlayer.isPlaying()) pauseAudio();
-                else playAudio(mSelectedAudioFile);
+                switch (v.getId()){
+                    case R.id.btn_play:
+                        if(mMediaPlayer == null) return;
+                        if(mMediaPlayer.isPlaying()) pauseAudio();
+                        else playAudio(mSelectedAudioFile);
+                        break;
+                    case R.id.btn_delete:
+                        recyclerViewRecordings.setVisibility(View.VISIBLE);
+                        mediaPlayerLayout.setVisibility(View.VISIBLE);
+                        deleteButton.setVisibility(View.GONE);
+                        cancelButton.setVisibility(View.GONE);
+                        confirmDeleteTextView.setVisibility(View.GONE);
+                        final boolean delete = mSelectedAudioFile.delete();
+                        mSelectedAudioFile = null;
+
+                        if (delete)
+                        Toast.makeText(ListRecordingActivity.this, "Delete", Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.btn_cancel:
+                        recyclerViewRecordings.setVisibility(View.VISIBLE);
+                        mediaPlayerLayout.setVisibility(View.VISIBLE);
+                        deleteButton.setVisibility(View.GONE);
+                        cancelButton.setVisibility(View.GONE);
+                        confirmDeleteTextView.setVisibility(View.GONE);
+                        Toast.makeText(ListRecordingActivity.this, "Cancel", Toast.LENGTH_SHORT).show();
+                        break;
+
+                }
+
+
             }
         };
 
@@ -94,26 +138,42 @@ public class ListRecordingActivity extends AppCompatActivity implements ListReco
 
     @Override
     public void onclick(int position) {
-        if (mMediaPlayer!=null){
-            if (mMediaPlayer.isPlaying()){
-                pauseAudio();
-                mMediaPlayer.stop();
-                mMediaPlayer.release();
+        if(recyclerViewRecordings.getVisibility() == View.VISIBLE){
+            if (mMediaPlayer!=null){
+                if (mMediaPlayer.isPlaying()){
+                    pauseAudio();
+                    mMediaPlayer.stop();
+                    mMediaPlayer.release();
+                }
+                mMediaPlayer=null;
             }
-            mMediaPlayer=null;
+
+
+            mSelectedAudioFile = mAllFiles.get(position);
+            playAudio(mAllFiles.get(position));
+            Toast.makeText(this, "playing....", Toast.LENGTH_SHORT).show();
         }
 
+    }
 
-        mSelectedAudioFile = mAllFiles[position];
-        playAudio(mAllFiles[position]);
-        Toast.makeText(this, "playing....", Toast.LENGTH_SHORT).show();
+    @Override
+    public void onLongClick(int position) {
+        recyclerViewRecordings.setVisibility(View.GONE);
+        mediaPlayerLayout.setVisibility(View.GONE);
+        deleteButton.setVisibility(View.VISIBLE);
+        cancelButton.setVisibility(View.VISIBLE);
+        confirmDeleteTextView.setVisibility(View.VISIBLE);
+        pauseAudio();
+        mSelectedAudioFile = mAllFiles.get(position);
     }
 
     private void pauseAudio() {
         //mMediaPlayer cannot be null here
-        mMediaPlayer.pause();
+        if(mMediaPlayer != null && mMediaPlayer.isPlaying())
+            mMediaPlayer.pause();
         playButton.setImageDrawable(getDrawable(R.drawable.ic_play_arrow_32dp));
-        timer.cancel();
+        if(timer != null)
+            timer.cancel();
         timer = null;
     }
     private void playAudio(File audioFile) {
@@ -179,5 +239,17 @@ public class ListRecordingActivity extends AppCompatActivity implements ListReco
                 pauseAudio();
             }
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(recyclerViewRecordings.getVisibility() == View.GONE){
+            recyclerViewRecordings.setVisibility(View.VISIBLE);
+            mediaPlayerLayout.setVisibility(View.VISIBLE);
+            deleteButton.setVisibility(View.GONE);
+            cancelButton.setVisibility(View.GONE);
+            confirmDeleteTextView.setVisibility(View.GONE);
+        } else
+            super.onBackPressed();
     }
 }

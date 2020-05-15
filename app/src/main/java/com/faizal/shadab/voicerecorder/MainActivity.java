@@ -6,7 +6,6 @@ import androidx.core.app.ActivityCompat;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.media.Image;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -34,7 +33,7 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mChronometer = findViewById(R.id.ch_timer);
-        mPlayButton = findViewById(R.id.btn_play);
+        mPlayButton = findViewById(R.id.btn_start_recording);
         mStopButton = findViewById(R.id.btn_stop);
         mStopButton.setEnabled(false);
         recordingList = findViewById(R.id.btn_list);
