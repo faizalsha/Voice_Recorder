@@ -38,6 +38,8 @@ public class ListRecordingActivity extends AppCompatActivity implements ListReco
     private LinearLayout mediaPlayerLayout;
     private TextView confirmDeleteTextView;
     private ListRecordingAdapter adapter;
+    private int audioPosition;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +66,7 @@ public class ListRecordingActivity extends AppCompatActivity implements ListReco
         recyclerViewRecordings.setHasFixedSize(false);
         recyclerViewRecordings.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewRecordings.setAdapter(adapter);
+
     }
 
     private void initializeListener() {
@@ -82,19 +85,23 @@ public class ListRecordingActivity extends AppCompatActivity implements ListReco
                         deleteButton.setVisibility(View.GONE);
                         cancelButton.setVisibility(View.GONE);
                         confirmDeleteTextView.setVisibility(View.GONE);
-                        final boolean delete = mSelectedAudioFile.delete();
-                        mSelectedAudioFile = null;
-
-                        if (delete)
-                        Toast.makeText(ListRecordingActivity.this, "Delete", Toast.LENGTH_SHORT).show();
-                        break;
+                        final boolean delete = mAllFiles.get(audioPosition).delete();
+                        mAllFiles.remove(audioPosition);
+                        recyclerViewRecordings.removeViewAt(audioPosition);
+                        adapter.notifyItemRemoved(audioPosition);
+                        adapter.notifyItemRangeChanged(audioPosition, mAllFiles.size());
+                        if(mMediaPlayer != null){
+                            mMediaPlayer.stop();
+                            mMediaPlayer.release();
+                            mMediaPlayer=null;
+                            seekBar.setMax(0);
+                        }
                     case R.id.btn_cancel:
                         recyclerViewRecordings.setVisibility(View.VISIBLE);
                         mediaPlayerLayout.setVisibility(View.VISIBLE);
                         deleteButton.setVisibility(View.GONE);
                         cancelButton.setVisibility(View.GONE);
                         confirmDeleteTextView.setVisibility(View.GONE);
-                        Toast.makeText(ListRecordingActivity.this, "Cancel", Toast.LENGTH_SHORT).show();
                         break;
 
                 }
@@ -147,11 +154,8 @@ public class ListRecordingActivity extends AppCompatActivity implements ListReco
                 }
                 mMediaPlayer=null;
             }
-
-
             mSelectedAudioFile = mAllFiles.get(position);
             playAudio(mAllFiles.get(position));
-            Toast.makeText(this, "playing....", Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -164,7 +168,7 @@ public class ListRecordingActivity extends AppCompatActivity implements ListReco
         cancelButton.setVisibility(View.VISIBLE);
         confirmDeleteTextView.setVisibility(View.VISIBLE);
         pauseAudio();
-        mSelectedAudioFile = mAllFiles.get(position);
+        audioPosition = position;
     }
 
     private void pauseAudio() {
@@ -196,7 +200,7 @@ public class ListRecordingActivity extends AppCompatActivity implements ListReco
                     public void run() {
                         seekBar.setProgress(mMediaPlayer.getCurrentPosition()/1000);
                     }
-                },0,900);
+                },0,100);
                 seekBar.setEnabled(true);
 
 
@@ -213,14 +217,13 @@ public class ListRecordingActivity extends AppCompatActivity implements ListReco
                 public void run() {
                     seekBar.setProgress(mMediaPlayer.getCurrentPosition()/1000);
                 }
-            },0,1000);
+            },0,100);
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Toast.makeText(this, "Destroy", Toast.LENGTH_SHORT).show();
         if (mMediaPlayer!=null){
             if (mMediaPlayer.isPlaying()){
                 pauseAudio();

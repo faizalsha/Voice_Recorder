@@ -7,4 +7,6 @@
 	<dimen name="dimen_14sp">28sp</dimen>
 	<dimen name="dimen_0dp">0dp</dimen>
 	<dimen name="dimen_12sp">24sp</dimen>
+	<dimen name="dimen_4dp">8.8dp</dimen>
+	<dimen name="dimen_256dp">563.2dp</dimen>
 </resources>

@@ -8,25 +8,23 @@
 
     <ImageView
         android:id="@+id/img_main_screen"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/dimen_64dp"
+        android:layout_width="@dimen/dimen_128dp"
+        android:layout_height="@dimen/dimen_128dp"
+        android:layout_marginTop="@dimen/dimen_32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_launcher_background" />
+        app:srcCompat="@drawable/ic_mic_128dp" />
 
     <Chronometer
         android:id="@+id/ch_timer"
         android:layout_width="wrap_content"
-
         android:layout_height="wrap_content"
-
-        android:layout_marginTop="@dimen/dimen_64dp"
 
         android:textSize="@dimen/dimen_32dp"
         app:layout_constraintEnd_toEndOf="parent"
+
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/img_main_screen" />
 
@@ -58,12 +56,13 @@
 
     <ImageView
         android:id="@+id/btn_list"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/dimen_8dp"
+        android:layout_width="@dimen/dimen_32dp"
+        android:layout_height="@dimen/dimen_32dp"
+        android:padding="@dimen/dimen_4dp"
         app:layout_constraintBottom_toBottomOf="@+id/ch_timer"
         app:layout_constraintStart_toEndOf="@+id/ch_timer"
         app:layout_constraintTop_toTopOf="@+id/ch_timer"
-        app:srcCompat="@drawable/ic_list_black_24dp" />
+        app:layout_constraintVertical_bias="1.0"
+        app:srcCompat="@drawable/ic_playlist_play_64dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
